@@ -1,10 +1,10 @@
-train_images: ./train/images
-val_images: ./valid/images
-test_images: ./test/images
+train: ./train/images
+val: ./valid/images
+test: ./test/images
 
-train_labels: ../train/labels
-val_labels: ../valid/labels
-test_labels: ../test/labels
+train_labels: ./train/labels
+val_labels: ./valid/labels
+test_labels: ./test/labels
 
 nc: 10
 names: ['Comminuted', 'Greenstick', 'Healthy', 'Linear', 'Oblique Displaced', 'Oblique', 'Segmental', 'Spiral', 'Transverse Displaced', 'Transverse']
