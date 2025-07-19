@@ -337,11 +337,25 @@ def inferenzaPerformance(dataset, model, processor, device, num_samples=50):
     else:
         return fps, ram_used, None, avg_time
 
-def main():
-    
+def performEvaluation(ds_test, model, processor, device):
     all_predictions, all_targets = calcolaPredizioni(
         ds_test, model, processor, DEVICE
     )
+
+    #save to file
+    predictions_file = os.path.join(OUTPUT_IMAGE_DIR, "yolo_style_predictions.json")
+    with open(predictions_file, 'w') as f:
+        json.dump(all_predictions, f, indent=2)
+    targets_file = os.path.join(OUTPUT_IMAGE_DIR, "yolo_style_targets.json")
+    with open(targets_file, 'w') as f:
+        json.dump(all_targets, f, indent=2)
+    print(f"Predizioni salvate in {predictions_file}")
+    print(f"Obiettivi salvati in {targets_file}")
+    return all_predictions, all_targets
+
+def main():
+    all_predictions, all_targets = performEvaluation(ds_test, model, processor, DEVICE)
+
     
     confidence_thresholds = np.linspace(0.0, 1.0, 21)  
     
