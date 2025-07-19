@@ -14,7 +14,7 @@ from PIL import Image
 from transformers import AutoImageProcessor
 from transformers.models.rt_detr import RTDetrForObjectDetection
 
-FINE_TUNED_MODEL_PATH = r"C:/Users/w11/Desktop/trainingDETR/rtdetr_improved_params/checkpoint-16900"
+FINE_TUNED_MODEL_PATH = r"./checkpoint-16900"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 OUTPUT_IMAGE_DIR = "rtdetr_yolo_style_analysis"
 DATASET_LOCATION = "./YOLO_to_COCO-1"
@@ -34,11 +34,11 @@ except Exception as e:
 
 try:
     ds_train = sv.DetectionDataset.from_coco(
-        images_directory_path=f"{DATASET_LOCATION}/train/",
-        annotations_path=f"{DATASET_LOCATION}/train/_annotations.coco.json",
+        images_directory_path=f"{DATASET_LOCATION}/train/images/",
+        annotations_path=f"{DATASET_LOCATION}/train/_annotations_train.coco.json",
     )
     ds_test = sv.DetectionDataset.from_coco(
-        images_directory_path=f"{DATASET_LOCATION}/test/",
+        images_directory_path=f"{DATASET_LOCATION}/test/images/",
         annotations_path=f"{DATASET_LOCATION}/test/_annotations.coco.json",
     )
     
@@ -78,10 +78,10 @@ def calcolaPredizioni(dataset, model, processor, device):
                 
                 for score, label, box in zip(pred_scores, pred_labels, pred_boxes):
                     all_predictions.append({
-                        'confidence': score,
-                        'class': label,
-                        'box': box,
-                        'image_id': i
+                        'confidence': float(score),
+                        'class': int(label),
+                        'box': [float(x) for x in box],
+                        'image_id': int(i)
                     })
             
             if len(annotations.class_id) > 0:
@@ -90,9 +90,9 @@ def calcolaPredizioni(dataset, model, processor, device):
                 
                 for label, box in zip(target_labels, target_boxes):
                     all_targets.append({
-                        'class': label,
-                        'box': box,
-                        'image_id': i
+                        'class': int(label),
+                        'box': [float(x) for x in box],
+                        'image_id': int(i)
                     })
     
     return all_predictions, all_targets
@@ -353,10 +353,22 @@ def performEvaluation(ds_test, model, processor, device):
     print(f"Obiettivi salvati in {targets_file}")
     return all_predictions, all_targets
 
-def main():
-    all_predictions, all_targets = performEvaluation(ds_test, model, processor, DEVICE)
+def retrievePredictionsTargetsFromFile():
+    #retrieve from file
+    predictions_file = os.path.join(OUTPUT_IMAGE_DIR, "yolo_style_predictions.json")
+    with open(predictions_file, 'r') as f:
+        all_predictions = json.load(f)
+    targets_file = os.path.join(OUTPUT_IMAGE_DIR, "yolo_style_targets.json")
+    with open(targets_file, 'r') as f:
+        all_targets = json.load(f)
 
-    
+    return all_predictions, all_targets
+
+def main():
+    #all_predictions, all_targets = performEvaluation(ds_test, model, processor, DEVICE)
+
+    all_predictions, all_targets = retrievePredictionsTargetsFromFile()
+
     confidence_thresholds = np.linspace(0.0, 1.0, 21)  
     
     metrics_per_threshold = calcolaMetriche(
