@@ -365,9 +365,9 @@ def retrievePredictionsTargetsFromFile():
     return all_predictions, all_targets
 
 def main():
-    #all_predictions, all_targets = performEvaluation(ds_test, model, processor, DEVICE)
+    #all_predictions, all_targets = performEvaluation(ds_test, model, processor, DEVICE)  # per generare file JSON
 
-    all_predictions, all_targets = retrievePredictionsTargetsFromFile()
+    all_predictions, all_targets = retrievePredictionsTargetsFromFile()  # per recuperare file JSON
 
     confidence_thresholds = np.linspace(0.0, 1.0, 21)  
     
